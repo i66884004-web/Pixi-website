@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixi - Your AI Assistant</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-6">
+
+<h1 class="text-3xl font-bold mb-2">🌟 Pixi — Your AI Assistant</h1>
+<div id="time" class="text-gray-400 mb-4"></div>
+
+<!-- Response -->
+<div id="response" class="bg-gray-800 p-4 rounded w-full max-w-2xl min-h-[120px] mb-4 overflow-auto"></div>
+
+<!-- Controls -->
+<div class="flex w-full max-w-2xl gap-2 mb-2">
+  <input id="userInput" type="text" placeholder="Type your message..." class="flex-1 p-2 rounded text-black"/>
+  <button id="sendBtn" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded">Send</button>
+  <button id="voiceBtn" class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded">🎤</button>
+  <button id="cmdBtn" class="bg-purple-500 hover:bg-purple-700 px-4 py-2 rounded">Commands</button>
+</div>
+
+<!-- Modal: Command Sheet -->
+<div id="cmdModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-3xl max-h-[85vh] overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+      <h2 class="text-xl font-semibold">📖 Pixi Command Sheet</h2>
+      <button id="closeModal" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600">Close</button>
+    </div>
+    <div class="p-4 overflow-y-auto space-y-5 text-sm leading-6">
+      <p>Ask Pixi for jokes, stories, recipes, math, open apps, play music, or code (HTML, JS, Roblox Lua).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const responseEl = document.getElementById("response");
+const synth = window.speechSynthesis;
+let chosenVoice = null;
+
+// Pick female voice
+function pickFemaleVoice() {
+  const voices = synth.getVoices();
+  chosenVoice = voices.find(v => /Samantha|Zira|Victoria|Serena|Amelie|Google UK English Female/i.test(v.name))
+                || voices.find(v => /female/i.test(v.name)) 
+                || voices[0] || null;
+}
+synth.onvoiceschanged = pickFemaleVoice;
+
+function speak(text) {
+  if (!chosenVoice) pickFemaleVoice();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.pitch = 1.1; u.rate = 1;
+  if (chosenVoice) u.voice = chosenVoice;
+  synth.speak(u);
+}
+
+function output(text) {
+  responseEl.textContent = text;
+  speak(text);
+}
+
+// Live time & date
+function updateTime() {
+  const now = new Date();
+  document.getElementById("time").textContent = `📅 ${now.toLocaleDateString()} ⏰ ${now.toLocaleTimeString()}`;
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+// Data
+const jokes = [
+  "Why don’t scientists trust atoms? Because they make up everything!",
+  "Why did the math book look sad? Because it had too many problems.",
+  "I told my computer I needed a break, and it said 'No problem—I’ll go to sleep.'",
+  "Why don’t skeletons fight each other? They don’t have the guts.",
+  "Parallel lines have so much in common… it’s a shame they’ll never meet.",
+  "Why was the scarecrow promoted? Because he was outstanding in his field.",
+  "What do you call fake spaghetti? An impasta.",
+  "Why don’t eggs tell jokes? They might crack up.",
+  "How does the ocean say hi? It waves!",
+  "Why was the computer cold? It left its Windows open.",
+  "I used to play piano by ear, but now I use my hands.",
+  "Why can’t you trust stairs? They’re always up to something.",
+  "Why did the student eat his homework? The teacher said it was a piece of cake.",
+  "What’s a computer’s favorite snack? Microchips!",
+  "Why did the golfer bring two pairs of pants? In case he got a hole in one.",
+  "I told my phone a joke; now it won’t stop laughing—it has good reception.",
+  "Why don’t seagulls fly over the bay? Then they’d be bagels.",
+  "What do you call cheese that isn’t yours? Nacho cheese.",
+  "Why did the bicycle fall over? It was two-tired.",
+  "What do you call a fish wearing a crown? A kingfish.",
+  "Why did the tomato turn red? Because it saw the salad dressing!",
+  "Why did the coffee file a police report? It got mugged.",
+  "Why don’t programmers like nature? Too many bugs.",
+  "How do you organize a space party? You planet.",
+  "Why did the computer go to the doctor? It caught a virus.",
+  "Why do cows wear bells? Because their horns don’t work.",
+  "Why did the chicken join a band? Because it had the drumsticks.",
+  "What’s orange and sounds like a parrot? A carrot.",
+  "Why did the banana go to the doctor? Because it wasn’t peeling well.",
+  "Why don’t oysters share their pearls? Because they’re shellfish."
+];
+
+const stories = [
+  "The Lantern in the Fog: Mira finds a lantern revealing hidden paths in the mist...",
+  "The Clockmaker’s Promise: A clock stores memories for the town...",
+  "The Paper City: Theo folds paper houses that survive a storm...",
+  "The Lost Star: A child follows a fallen star across the desert...",
+  "Whispering Trees: The forest whispers secrets to those who listen...",
+  "Time Traveler's Letter: A letter arrives from the future...",
+  "The Hidden Garden: Behind a stone wall, a magical garden blooms at night...",
+  "The Clock Tower Cat: A cat observes all events from the town clock...",
+  "The Music Box Mystery: A music box predicts the town’s future...",
+  "The Forgotten Library: Dusty books tell stories of heroes no one remembers...",
+  "The Silver Key: A key opens doors to places in imagination...",
+  "The Candle Maker’s Secret: A candle reveals visions in moonlight...",
+  "The Mirror Lake: Reflections show what could be...",
+  "The Paper Airplane: Delivers messages of hope across the city...",
+  "The Star Painter: A child paints constellations in the night sky..."
+];
+
+const recipes = [
+  "Scrambled Eggs: Beat eggs with salt & pepper. Cook in butter. Optional: cheese/herbs.",
+  "Chocolate Chip Cookies: Cream butter+sugar, add egg & vanilla. Mix in flour+soda+salt. Fold in chocolate. Bake 10-12 min at 350°F.",
+  "Pasta: Boil pasta. Sauté garlic in olive oil. Add pasta+water. Season with lemon, salt, pepper, parmesan.",
+  "Caesar Salad: Romaine, croutons, parmesan, Caesar dressing.",
+  "Margherita Pizza: Dough, tomato sauce, mozzarella, basil. Bake until golden.",
+  "Tomato Soup: Sauté onions, add tomatoes+broth. Blend. Season with salt, pepper, basil.",
+  "Club Sandwich: Toasted bread, turkey, bacon, lettuce, tomato, mayo.",
+  "Tacos: Tortillas, meat/beans, cheese, lettuce, salsa.",
+  "Curry: Cook meat/vegetables with curry powder, coconut milk, and spices.",
+  "Sushi Rolls: Rice, nori, fish/vegetables, roll and slice.",
+  "Pancakes: Mix flour, milk, egg, cook on skillet, serve with syrup.",
+  "Donuts: Dough fried or baked, coated with sugar or glaze.",
+  "Brownies: Chocolate, butter, sugar, eggs, flour. Bake 25-30 min.",
+  "Greek Salad: Tomato, cucumber, olives, feta, olive oil.",
+  "Carbonara: Pasta, eggs, parmesan, pancetta, black pepper."
+];
+
+const songs = [
+  "Shape of You","Blinding Lights","Levitating","Peaches","Stay","Bad Habits","Good 4 U","Industry Baby",
+  "Shivers","As It Was","Ghost","Easy On Me","abcdefu","Happier Than Ever","Montero","Drivers License",
+  "Watermelon Sugar","Save Your Tears","Don't Start Now","Senorita","Circles","Sunflower","Memories",
+  "Lovely","Mood","Rain On Me","Positions","WAP","Therefore I Am","Kings & Queens","Heat Waves",
+  "Butter","My Universe","Take My Breath","Cold Heart","STAY","About Damn Time","First Class","Peaches"
+];
+
+const apps = {
+  youtube:"https://youtube.com",
+  google:"https://google.com",
+  amazon:"https://amazon.com",
+  roblox:"https://roblox.com",
+  minecraft:"https://minecraft.net",
+  duolingo:"https://duolingo.com"
+};
+
+const codeSnippets = [
+  {type:"HTML", code:"<button class='bg-blue-500 text-white p-2'>Click Me</button>"},
+  {type:"JS", code:"function add(a,b){return a+b;} console.log(add(2,3));"},
+  {type:"Roblox Lua", code:"local part = Instance.new('Part') part.Parent = workspace part.Size = Vector3.new(4,1,2)"}
+];
+
+// Math
+function tryMath(t){
+  const safe = t.replace(/[^0-9+\-*/\\(). xX]/g,"");
+  if (/[\d)\]]\s*[xX*\/\\]\s*[\d(]/.test(safe)){
+    const expr = safe.replace(/x/gi,"*").replace(/\\/g,"/");
+    try { return String(Function(`"use strict";return (${expr})`)()); } catch{ return null;}
+  }
+  return null;
+}
+
+// Process command
+function processCommand(cmd){
+  const lower = cmd.toLowerCase().trim();
+  let resp = "";
+
+  if(/hello|hi|hey/i.test(lower)) resp = "Hello! How can I help you today?";
+  else if(lower.includes("joke")) resp = jokes[Math.floor(Math.random()*jokes.length)];
+  else if(lower.includes("story")) resp = stories[Math.floor(Math.random()*stories.length)];
+  else if(lower.includes("recipe")) resp = recipes[Math.floor(Math.random()*recipes.length)];
+  else if(lower.startsWith("open ")){
+    const key = Object.keys(apps).find(k=>lower.includes(k));
+    if(key){window.open(apps[key],"_blank"); resp=`Opening ${key}...`;}
+  }
+  else if(lower.includes("play music")){
+    let song = songs[Math.floor(Math.random()*songs.length)];
+    const m = cmd.match(/play this (.+)$/i);
+    if(m) song = m[1];
+    const url = "https://www.youtube.com/results?search_query="+encodeURIComponent(song);
+    window.open(url,"_blank");
+    resp = `Playing "${song}" on YouTube...`;
+  }
+  else if(lower.startsWith("code") || lower.startsWith("write") || lower.startsWith("make")){
+    const snippet = codeSnippets[Math.floor(Math.random()*codeSnippets.length)];
+    resp = `Here’s a ${snippet.type} snippet:\n${snippet.code}`;
+
+    const oldBtn = document.getElementById("copy-btn");
+    if(oldBtn) oldBtn.remove();
+
+    const copyBtn = document.createElement("button");
+    copyBtn.id = "copy-btn";
+    copyBtn.textContent = "Copy Code";
+    copyBtn.className = "mt-2 bg-yellow-500 hover:bg-yellow-700 text-black font-bold py-1 px-2 rounded";
+    copyBtn.onclick = () => { navigator.clipboard.writeText(snippet.code); alert("Code copied!"); };
+    responseEl.parentNode.insertBefore(copyBtn, responseEl.nextSibling);
+  }
+  else{
+    const math = tryMath(lower);
+    if(math!==null) resp = math;
+  }
+
+  if(!resp) resp = "I didn’t catch that. Try: joke, story, recipe, play music, open apps, code, or math.";
+
+  output(resp);
+}
+
+// UI
+document.getElementById("sendBtn").onclick=()=>{
+  const v=document.getElementById("userInput").value.trim();
+  if(v){processCommand(v);document.getElementById("userInput").value="";}
+};
+document.getElementById("userInput").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("sendBtn").click();});
+document.getElementById("voiceBtn").onclick=()=>{
+  const Rec=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!Rec)return output("Voice recognition not supported.");
+  const r=new Rec();
+  r.lang="en-US";
+  r.start();
+  r.onresult=e=>processCommand(e.results[0][0].transcript);
+};
+
+// Modal
+const modal=document.getElementById("cmdModal");
+document.getElementById("cmdBtn").onclick=()=>{modal.classList.remove("hidden");modal.classList.add("flex");};
+document.getElementById("closeModal").onclick=()=>{modal.classList.add("hidden");modal.classList.remove("flex");};
+modal.addEventListener("click",e=>{if(e.target===modal){modal.classList.add("hidden");modal.classList.remove("flex");}});
+
+// Initial greeting
+const hour=new Date().getHours();
+output(hour<12?"Good morning!":"Good afternoon!");
+</script>
+</body>
+</html>
